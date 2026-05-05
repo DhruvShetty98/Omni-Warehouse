@@ -1,65 +1,151 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from 'react';
+import { Server, Activity, XCircle, Clock } from 'lucide-react';
+import { Line, Pie } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
+
+export default function Dashboard() {
+  const [stats, setStats] = useState({ total: 0, active: 0, failed: 0, lastBackup: 'Never' });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await fetch('/api/warehouses');
+        const data = await res.json();
+        
+        if (data.success) {
+          const total = data.data.length;
+          const active = data.data.filter((w: any) => w.status === 'Running').length;
+          const failed = data.data.filter((w: any) => w.status === 'Failed').length;
+          setStats({ total, active, failed, lastBackup: 'Just now' }); // Mock last backup for UI
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  const lineData = {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    datasets: [
+      {
+        label: 'Warehouses Created',
+        data: [2, 4, 3, 7, 5, stats.total],
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.5)',
+        tension: 0.4
+      }
+    ]
+  };
+
+  const pieData = {
+    labels: ['Active', 'Creating', 'Failed'],
+    datasets: [
+      {
+        data: [stats.active, stats.total - stats.active - stats.failed, stats.failed],
+        backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
+        borderWidth: 0,
+      }
+    ]
+  };
+
+  const lineOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' as const } }
+  };
+
+  if (loading) return <div className="text-slate-500">Loading dashboard...</div>;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-slate-800">System Overview</h1>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+          <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
+            <Server className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-sm text-slate-500 font-medium">Total Warehouses</p>
+            <p className="text-2xl font-bold text-slate-800">{stats.total}</p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+          <div className="p-3 bg-green-50 text-green-600 rounded-lg">
+            <Activity className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-sm text-slate-500 font-medium">Active Warehouses</p>
+            <p className="text-2xl font-bold text-slate-800">{stats.active}</p>
+          </div>
         </div>
-      </main>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+          <div className="p-3 bg-red-50 text-red-600 rounded-lg">
+            <XCircle className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-sm text-slate-500 font-medium">Failed Deployments</p>
+            <p className="text-2xl font-bold text-slate-800">{stats.failed}</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
+          <div className="p-3 bg-purple-50 text-purple-600 rounded-lg">
+            <Clock className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-sm text-slate-500 font-medium">Last Backup Time</p>
+            <p className="text-lg font-bold text-slate-800">{stats.lastBackup}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 lg:col-span-2 h-96">
+          <h2 className="text-lg font-bold text-slate-800 mb-4">Warehouse Creation Trend</h2>
+          <div className="h-72">
+            <Line data={lineData} options={lineOptions} />
+          </div>
+        </div>
+        
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-96">
+          <h2 className="text-lg font-bold text-slate-800 mb-4">Status Distribution</h2>
+          <div className="h-72 flex justify-center items-center">
+            <Pie data={pieData} options={{ responsive: true, maintainAspectRatio: false }} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
