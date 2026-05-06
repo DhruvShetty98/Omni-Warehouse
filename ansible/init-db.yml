@@ -1,0 +1,24 @@
+- hosts: localhost
+  vars:
+    db_name: "warehouse"
+    db_user: "root"
+    db_pass: "12345"
+
+  tasks:
+
+    - name: Wait for MySQL container to be ready
+      shell: |
+        until docker exec mysql_{{ name }} mysqladmin ping -h "localhost" --silent; do
+          sleep 2
+        done
+
+    - name: Create products table
+      shell: |
+        docker exec mysql_{{ name }} mysql -u{{ db_user }} -p{{ db_pass }} -e "
+        USE {{ db_name }};
+        CREATE TABLE IF NOT EXISTS products (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          name VARCHAR(100),
+          quantity INT,
+          price DECIMAL(10,2)
+        );"

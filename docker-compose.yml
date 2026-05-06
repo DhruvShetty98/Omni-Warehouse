@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    user: root
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    networks:
+      - devops-net
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+  mysql-test:
+    image: mysql:latest
+    container_name: mysql-test
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345
+      MYSQL_DATABASE: warehouse
+    networks:
+      - devops-net
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+  terraform:
+    image: hashicorp/terraform:latest
+    container_name: terraform
+    networks:
+      - devops-net
+    volumes:
+      - ./terraform:/workspace
+    working_dir: /workspace
+    entrypoint: ["tail", "-f", "/dev/null"]  # keep container alive
+
+  ansible:
+    image: quay.io/ansible/ansible-runner:latest
+    container_name: ansible
+    networks:
+      - devops-net
+    volumes:
+      - ./ansible:/ansible
+    working_dir: /ansible
+    entrypoint: ["tail", "-f", "/dev/null"]  # keep container alive
+
+networks:
+  devops-net:
+    driver: bridge
+
+volumes:
+  jenkins_home:
+  mysql_data:
