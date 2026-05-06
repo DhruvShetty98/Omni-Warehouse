@@ -10,6 +10,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ action:
 
     // In a real scenario, we would make a fetch to Jenkins webhook here:
     // await fetch('http://jenkins-server/generic-webhook-trigger/invoke?token=mytoken', { ... })
+    const username = "Rahil010205";
+    const token = process.env.JENKINS_TOKEN;
+
+    // Step 1: Get crumb
+    const crumbRes = await fetch('http://localhost:8080/crumbIssuer/api/json', {
+      headers: {
+        'Authorization': 'Basic ' + Buffer.from(`${username}:${token}`).toString('base64')
+      }
+    });
+
+    const crumbData = await crumbRes.json();
 
     // Simulate Jenkins running the job and calling our callback after some time
     if (action === 'create') {
@@ -17,7 +28,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ action:
         fetch(`http://localhost:8080/job/Omni-Warehouse/buildWithParameters?WAREHOUSE_NAME=${warehouse_name}&ACTION=create`, {
           method: 'POST',
           headers: {
-            'Authorization': 'Basic ' + Buffer.from(`YOUR_USERNAME:${process.env.JENKINS_TOKEN}`).toString('base64')
+            'Authorization': 'Basic ' + Buffer.from(`Rahil010205:${process.env.JENKINS_TOKEN}`).toString('base64'),
+            [crumbData.crumbRequestField]: crumbData.crumb
           },
           body: JSON.stringify({ warehouse_id, status: 'Running', api_status: 'running', db_status: 'running' })
         }).catch(console.error);
@@ -27,7 +39,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ action:
         fetch(`http://localhost:8080/job/Omni-Warehouse/buildWithParameters?WAREHOUSE_NAME=${warehouse_name}&ACTION=delete`, {
           method: 'POST',
           headers: {
-            'Authorization': 'Basic ' + Buffer.from('username:API_TOKEN').toString('base64')
+            'Authorization': 'Basic ' + Buffer.from(`Rahil010205:${process.env.JENKINS_TOKEN}`).toString('base64'),
+            [crumbData.crumbRequestField]: crumbData.crumb
           },
           body: JSON.stringify({ warehouse_id, status: 'Deleted', api_status: 'stopped', db_status: 'stopped' })
         }).catch(console.error);
