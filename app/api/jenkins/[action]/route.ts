@@ -14,7 +14,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ action:
     // Simulate Jenkins running the job and calling our callback after some time
     if (action === 'create') {
       setTimeout(() => {
-        fetch(`http://localhost:3000/api/jenkins/callback`, {
+        fetch(`http://localhost:8080/job/Omni-Warehouse/buildWithParameters?WAREHOUSE_NAME=${warehouse_name}&ACTION=create`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ warehouse_id, status: 'Running', api_status: 'running', db_status: 'running' })
@@ -22,7 +22,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ action:
       }, 10000); // 10 seconds mock provision time
     } else if (action === 'delete') {
       setTimeout(() => {
-        fetch(`http://localhost:3000/api/jenkins/callback`, {
+        fetch(`http://localhost:8080/job/Omni-Warehouse/buildWithParameters?WAREHOUSE_NAME=${warehouse_name}&ACTION=delete`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ warehouse_id, status: 'Deleted', api_status: 'stopped', db_status: 'stopped' })
