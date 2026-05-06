@@ -3,7 +3,7 @@
     db_name: "warehouse"
     db_user: "root"
     db_pass: "12345"
-    warehouse_name: "{{ name | default(warehouse_name | default('default')) }}"
+    warehouse_name: "{{ name | default('default') }}"
 
   tasks:
 
@@ -22,4 +22,4 @@
           quantity INT,
           price DECIMAL(10,2)
         );
-EOF
+        EOF
