@@ -3,22 +3,23 @@
     db_name: "warehouse"
     db_user: "root"
     db_pass: "12345"
+    warehouse_name: "{{ name | default(warehouse_name | default('default')) }}"
 
   tasks:
 
     - name: Wait for MySQL container to be ready
       shell: |
-        until docker exec mysql_{{ name }} mysqladmin ping -h "localhost" --silent; do
+        until docker exec mysql_{{ warehouse_name }} mysqladmin ping -h 127.0.0.1 -u{{ db_user }} -p{{ db_pass }} --silent; do
           sleep 2
         done
 
     - name: Create products table
       shell: |
-        docker exec mysql_{{ name }} mysql -u{{ db_user }} -p{{ db_pass }} -e "
-        USE {{ db_name }};
+        docker exec mysql_{{ warehouse_name }} mysql -h 127.0.0.1 -u{{ db_user }} -p{{ db_pass }} {{ db_name }} <<'EOF'
         CREATE TABLE IF NOT EXISTS products (
           id INT AUTO_INCREMENT PRIMARY KEY,
           name VARCHAR(100),
           quantity INT,
           price DECIMAL(10,2)
-        );"
+        );
+EOF
