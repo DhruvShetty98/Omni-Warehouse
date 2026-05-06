@@ -6,7 +6,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ action:
     const body = await req.json();
     const { warehouse_id, warehouse_name } = body;
     
-    console.log(`[JENKINS MOCK] Triggering pipeline for action: ${action}, warehouse: ${warehouse_name}`);
+    console.log(`Triggering pipeline for action: ${action}, warehouse: ${warehouse_name}`);
 
     // In a real scenario, we would make a fetch to Jenkins webhook here:
     // await fetch('http://jenkins-server/generic-webhook-trigger/invoke?token=mytoken', { ... })
@@ -16,7 +16,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ action:
       setTimeout(() => {
         fetch(`http://localhost:8080/job/Omni-Warehouse/buildWithParameters?WAREHOUSE_NAME=${warehouse_name}&ACTION=create`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Authorization': 'Basic ' + Buffer.from(`YOUR_USERNAME:${process.env.JENKINS_TOKEN}`).toString('base64')
+          },
           body: JSON.stringify({ warehouse_id, status: 'Running', api_status: 'running', db_status: 'running' })
         }).catch(console.error);
       }, 10000); // 10 seconds mock provision time
@@ -24,7 +26,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ action:
       setTimeout(() => {
         fetch(`http://localhost:8080/job/Omni-Warehouse/buildWithParameters?WAREHOUSE_NAME=${warehouse_name}&ACTION=delete`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Authorization': 'Basic ' + Buffer.from('username:API_TOKEN').toString('base64')
+          },
           body: JSON.stringify({ warehouse_id, status: 'Deleted', api_status: 'stopped', db_status: 'stopped' })
         }).catch(console.error);
       }, 5000);
