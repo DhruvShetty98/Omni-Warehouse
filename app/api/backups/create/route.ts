@@ -58,7 +58,7 @@ export async function POST(req: Request) {
 
 async function triggerJenkinsBackup(warehouse: any, backupId: number, jenkinsUrl: string, username: string, token: string, crumbData: any) {
   try {
-    const buildUrl = `${jenkinsUrl}/job/Omni-Warehouse/buildWithParameters?WAREHOUSE_ID=${warehouse.id}&WAREHOUSE_NAME=${warehouse.name}&ACTION=backup`;
+    const buildUrl = `${jenkinsUrl}/job/Omni-Warehouse/buildWithParameters?WAREHOUSE_NAME=${warehouse.name}&ACTION=backup`;
     
     const response = await fetch(buildUrl, {
       method: 'POST',
