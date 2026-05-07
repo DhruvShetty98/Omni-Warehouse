@@ -3,18 +3,18 @@ import { dbMgmt } from '@/lib/db';
 
 export async function POST(req: Request) {
   try {
-    const { warehouse_id, status, api_status, db_status } = await req.json();
+    const { warehouse_name, status, api_status, db_status } = await req.json();
 
-    if (!warehouse_id || !status) {
+    if (!warehouse_name || !status) {
       return NextResponse.json({ success: false, error: 'Missing parameters' }, { status: 400 });
     }
 
     if (status === 'Deleted') {
-       await dbMgmt.query('DELETE FROM warehouses WHERE id = ?', [warehouse_id]);
+       await dbMgmt.query('DELETE FROM warehouses WHERE name = ?', [warehouse_name]);
     } else {
        await dbMgmt.query(
-         'UPDATE warehouses SET status = ?, api_status = ?, db_status = ? WHERE id = ?',
-         [status, api_status, db_status, warehouse_id]
+         'UPDATE warehouses SET status = ?, api_status = ?, db_status = ? WHERE name = ?',
+         [status, api_status, db_status, warehouse_name]
        );
     }
 
