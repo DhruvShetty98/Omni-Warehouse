@@ -13,8 +13,6 @@ export default function WarehouseDetailPage() {
 
   useEffect(() => {
     fetchWarehouse();
-    const interval = setInterval(fetchWarehouse, 5000);
-    return () => clearInterval(interval);
   }, [id]);
 
   const fetchWarehouse = async () => {

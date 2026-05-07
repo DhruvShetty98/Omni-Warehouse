@@ -11,8 +11,6 @@ export default function WarehousesPage() {
 
   useEffect(() => {
     fetchWarehouses();
-    const interval = setInterval(fetchWarehouses, 5000); // Poll for status updates
-    return () => clearInterval(interval);
   }, []);
 
   const fetchWarehouses = async () => {
@@ -127,9 +125,10 @@ export default function WarehousesPage() {
                   </td>
                   <td className="px-6 py-4 text-slate-500">{new Date(wh.created_at).toLocaleString()}</td>
                   <td className="px-6 py-4 flex items-center justify-end gap-3">
+                    {wh.status !== 'Deleted' &&
                     <Link href={`/warehouses/${wh.id}`} className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors" title="View Details">
                       <Eye className="w-4 h-4" />
-                    </Link>
+                    </Link>}
                     <button 
                       onClick={() => handleDelete(wh.id)}
                       className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors" 
