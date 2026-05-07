@@ -14,12 +14,12 @@
         done
 
     - name: Create products table
-      shell: |
-        docker exec mysql_{{ warehouse_name }} mysql -h 127.0.0.1 -u{{ db_user }} -p{{ db_pass }} {{ db_name }} <<'EOF'
-        CREATE TABLE IF NOT EXISTS products (
+      shell: >
+        docker exec mysql_{{ warehouse_name }}
+        mysql -h 127.0.0.1 -u{{ db_user }} -p{{ db_pass }} -D {{ db_name }}
+        -e "CREATE TABLE IF NOT EXISTS products (
           id INT AUTO_INCREMENT PRIMARY KEY,
           name VARCHAR(100),
           quantity INT,
           price DECIMAL(10,2)
-        );
-        EOF
+          );"
