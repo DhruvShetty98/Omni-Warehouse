@@ -10,7 +10,8 @@ export async function POST(req: Request) {
     }
 
     if (status === 'Deleted') {
-       await dbMgmt.query('DELETE FROM warehouses WHERE name = ?', [warehouse_name]);
+       await dbMgmt.query('UPDATE warehouses SET status = ?, api_status = ?, db_status = ? WHERE name = ?',
+         [status, api_status, db_status, warehouse_name]);
     } else {
        await dbMgmt.query(
          'UPDATE warehouses SET status = ?, api_status = ?, db_status = ? WHERE name = ?',
