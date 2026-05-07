@@ -111,7 +111,7 @@ export async function PUT(req: Request) {
     // ✅ REPORT GENERATION (REAL FLOW)
     /////////////////////////////////////////////////////////////
 
-    const products = JSON.parse(data || '[]');
+    const products = Array.isArray(data) ? data : [];
 
     let total_sales = 0;
     let total_orders = 0;
